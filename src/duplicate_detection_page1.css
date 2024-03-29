@@ -75,10 +75,14 @@
 .Results th {
   background-color: #1008E9; /* Blue color */
   color: white; /* White text color */
-  padding: 10px; /* Padding for the header cells */
+ 
+  /* Padding for the header cells */
+  border: 1px solid black; /* Add a black border to table cells */
+  padding: 8px; /* Adjust padding as needed */
 }
 
 .Results td {
+  border: 1px solid black; /* Add a black border to table cells */
   padding: 10px; /* Padding for the data cells */
 }
 
@@ -90,4 +94,29 @@
   padding-left: 40%;
   justify-content: center;
   align-items: center;
+}
+
+.filter {
+  margin-bottom: 10px; /* Adjust margin bottom as needed */
+}
+
+.filter input {
+  width: 100%; /* Set width to 100% to fill the parent container */
+  padding: 8px; /* Adjust padding as needed */
+  box-sizing: border-box; /* Ensure padding is included in the width */
+}
+.CompareButton {
+  margin-top: 20px; /* Add margin top to move the button down */
+  padding: 10px 20px; /* Add padding to increase button size */
+  background-color: #292d29; /* Set background color */
+  color: rgb(211, 211, 211); /* Set text color */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Add border radius for rounded corners */
+  cursor: pointer; /* Add cursor pointer on hover */
+  font-size: 16px; /* Set font size */
+  transition: background-color 0.3s; /* Add smooth transition effect */
+}
+
+.CompareButton:hover {
+  background-color: #e286de; /* Darken background color on hover */
 }

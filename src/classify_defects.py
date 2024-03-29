@@ -2,18 +2,9 @@ from flask import Flask, request, jsonify
 import pandas as pd
 import joblib
 import logging
-import pandas as pd
-import numpy as np
-from numpy import random
 import nltk
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from sklearn.metrics import accuracy_score, confusion_matrix
-import matplotlib.pyplot as plt
-from nltk.corpus import stopwords
 import re
 from bs4 import BeautifulSoup
-
 
 nltk.download('stopwords')
 from nltk.corpus import stopwords
@@ -21,11 +12,9 @@ from nltk.corpus import stopwords
 app = Flask(__name__)
 
 # Load the ML model
-model_cat1 = joblib.load(r'C:\VIT\Bugs_classification\sgd_category1.pkl')  # Replace 'your_model_cat1.pkl' with the path to your Category 1 model file
-model_cat2 = joblib.load(r'C:\VIT\Bugs_classification\sgd_category2.pkl')  # Replace 'your_model_cat2.pkl' with the path to your Category 2 model file
-# @app.route('/')
-# def index():
-#     return 'Welcome to the API!'
+model_cat1 = joblib.load('D:/TY-Sem/EDI/error/bugsclassificationdebugging/sgd_category1.pkl')  # Update with correct path
+model_cat2 = joblib.load('D:/TY-Sem2/EDI/error/bugsclassificationdebugging/sgd_category2.pkl')  # Update with correct path
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     # Check if the post request has the file part
@@ -42,52 +31,40 @@ def upload_file():
     try:
         df = pd.read_excel(file)
 
-        # Specify the path and filename for the CSV file
-        csv_filename = 'datasettotest.csv'
+        # Clean text data
+        df['Issue Summary'] = df['Issue Summary'].apply(clean_text)
 
-        # Convert the DataFrame to CSV format and save it
-        df.to_csv(csv_filename, index=False)
-        
+        # Predict Category 1 using the first model
+        predictions_cat1 = model_cat1.predict(df['Issue Summary'])
+
+        # Predict Category 2 using the second model
+        predictions_cat2 = model_cat2.predict(df['Issue Summary'])
+
+        # Create DataFrame with predictions for both categories
+        final_result = pd.DataFrame({'Issue Summary': df['Issue Summary'], 
+                                     'Category1': predictions_cat1,
+                                     'Category2': predictions_cat2})
+
+        # Return the final result as JSON
+        return final_result.to_json(orient='records')
+
     except Exception as e:
-        return jsonify({'error': f'Error reading Excel file: {str(e)}'})
+        return jsonify({'error': str(e)})
 
+def clean_text(text):
+    """
+    Clean and preprocess text data.
+    """
     REPLACE_BY_SPACE_RE = re.compile('[/(){}\\[\\]\\|@,;]')
     BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
     STOPWORDS = set(stopwords.words('english'))
 
-    def clean_text(text):
-        """
-            text: a string
-
-            return: modified initial string
-        """
-        text = BeautifulSoup(text, "lxml").text # HTML decoding
-        text = text.lower() # lowercase text
-        text = REPLACE_BY_SPACE_RE.sub(' ', text) # replace REPLACE_BY_SPACE_RE symbols by space in text
-        text = BAD_SYMBOLS_RE.sub('', text) # delete symbols which are in BAD_SYMBOLS_RE from text
-        text = ' '.join(word for word in text.split() if word not in STOPWORDS) # delete stopwors from text
-        return text
-
-    df['Issue Summary'] = df['Issue Summary'].apply(clean_text)
-    try:
-        predictions_cat1 = model_cat1.predict(df['Issue Summary'])
-    except Exception as e:
-        return jsonify({'error': f'Error predicting Category 1: {str(e)}'})
-
-    # Predict Category 2 using the second model
-    try:
-        predictions_cat2 = model_cat2.predict(df['Issue Summary'])
-    except Exception as e:
-        return jsonify({'error': f'Error predicting Category 2: {str(e)}'})
-
-    # Create DataFrame with predictions for both categories
-    final_result = pd.DataFrame({'Issue Summary': df['Issue Summary'], 
-                                 'Category1': predictions_cat1,
-                                 'Category2': predictions_cat2})
-
-    # Return the final result as JSON
-    print(final_result)
-    return final_result.to_json(orient='records')
+    text = BeautifulSoup(text, "lxml").text  # HTML decoding
+    text = text.lower()  # lowercase text
+    text = REPLACE_BY_SPACE_RE.sub(' ', text)  # replace REPLACE_BY_SPACE_RE symbols by space in text
+    text = BAD_SYMBOLS_RE.sub('', text)  # delete symbols which are in BAD_SYMBOLS_RE from text
+    text = ' '.join(word for word in text.split() if word not in STOPWORDS)  # delete stopwors from text
+    return text
 
 if __name__ == '__main__':
     app.run(debug=True)

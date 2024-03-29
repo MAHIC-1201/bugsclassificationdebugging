@@ -36,6 +36,7 @@ function DuplicatesDetectionPage1({ setCurrentPage }) {
       openGoogleDrivePicker();
     }
   };
+ 
 
   const openGoogleDrivePicker = () => {
     console.log("Opening Google Drive picker...");
@@ -215,7 +216,7 @@ function DuplicatesDetectionPage1({ setCurrentPage }) {
             </div>
           )}
         </div>
-        <button onClick={handleSubmit} disabled={!selectedOldFile || !selectedNewFile || loading}>
+        <button className='CompareButton' onClick={handleSubmit} disabled={!selectedOldFile || !selectedNewFile || loading}>
           {loading ? 'Comparing...' : 'Compare Reports'
           }
         </button>
